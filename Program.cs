@@ -1,9 +1,22 @@
 using Microsoft.EntityFrameworkCore;
 using IFnancas.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using IFnancas.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Usuario/Login";
+        options.AccessDeniedPath = "/Usuario/Login";
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+    });
+    
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -29,6 +42,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
